@@ -42,6 +42,30 @@
     </style>
 </head>
 <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="#">Your Website</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="home.php">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="search_rooms.php">Search Rooms</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="register.php">Register</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="login.php">Login</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-4">
@@ -73,8 +97,7 @@
                 </div>
                 <div class="text-center mt-3">
                     <p>Don't have an account? <a href="register.php">Register here</a></p>
-                    <!-- Button to search rooms page -->
-                    <a href="search_rooms.php" class="btn btn-secondary">Search Rooms</a>
+
                 </div>
             </div>
         </div>

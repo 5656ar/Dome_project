@@ -1,32 +1,11 @@
 <?php
 include 'connect.php';
-session_start(); // Start the session
+session_start();
 
-// Check if session variables are set
-if (!isset($_SESSION['userId'])) {
-    header("Location: login.php");
-    exit();
-}
-
-$userId = $_SESSION['userId'];
-
-// Fetch user data from the database to get the latest information
-$stmt = $conn->prepare("SELECT firstName, lastName, gender, email, number FROM registration WHERE id = ?");
-$stmt->bind_param("i", $userId);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows === 0) {
-    die("User not found.");
-}
-
-$row = $result->fetch_assoc();
-
-// Store data in session variables for easy access
-$_SESSION['firstName'] = $row['firstName'];
-$_SESSION['lastName'] = $row['lastName'];
-$_SESSION['email'] = $row['email'];
-$_SESSION['number'] = $row['number'];
+// Fetch the latest notification
+$sql = "SELECT * FROM notifications ORDER BY created_at DESC LIMIT 1";
+$result = $conn->query($sql);
+$latestNotification = $result->fetch_assoc();
 ?>
 
 <!DOCTYPE html>
@@ -34,31 +13,65 @@ $_SESSION['number'] = $row['number'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Welcome Page</title>
+    <title>Home Page</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .container {
-            margin-top: 100px;
+        .notification-banner {
+            background-color: #ffc107;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            color: #000;
         }
     </style>
 </head>
 <body>
-<div class="container text-center">
-    <h1 class="welcome-message">Welcome to Your Dashboard!</h1>
-    <h3><?php echo htmlspecialchars($_SESSION['firstName']) . " " . htmlspecialchars($_SESSION['lastName']); ?></h3>
-    <h3><?php echo "Your email is: " . htmlspecialchars($_SESSION['email']); ?></h3>
-    <p>You are logged in.</p>
-    
-    <form action="logout.php" method="post" onsubmit="return confirm('Are you sure you want to log out?');">
-        <button type="submit" class="btn btn-danger" aria-label="Logout">Get Out</button>
-    </form>
 
-    <!-- Add Edit Profile Button -->
-    <a href="edit_profile.php" class="btn btn-primary mt-3">Edit Profile</a>
-</div>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <a class="navbar-brand" href="#">Your Website</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="home.php">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="search_rooms.php">Search Rooms</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="register.php">Register</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="login.php">Login</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Notification Banner -->
+<?php if ($latestNotification): ?>
+    <div class="notification-banner">
+        <p>🔔 Latest Notification: <?php echo $latestNotification['title']; ?></p>
+        <p><?php echo $latestNotification['content']; ?></p>
+    </div>
+<?php endif; ?>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <h1>Welcome to Our Website</h1>
+        <p>Your journey starts here. Explore the best rooms and services available for your next adventure.</p>
+        <a href="search_rooms.php" class="btn btn-light btn-lg">Search Rooms</a>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-dark text-white text-center py-4 mt-5">
+    <p>&copy; 2024 Your Website. All Rights Reserved.</p>
+</footer>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
