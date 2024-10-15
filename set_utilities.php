@@ -145,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <td><?php echo htmlspecialchars($row['lastName']); ?></td> <!-- แสดง Last Name -->
                             <td><?php echo htmlspecialchars($row['email']); ?></td> <!-- แสดง Email -->
                             <td>
-                                <input type="number" step="0.01" name="water_bill[<?php echo $row['room_id']; ?>]" value="0" class="form-control" required>
+                                <input type="number" step="0.01" name="water_bill[<?php echo $row['room_id']; ?>]" value="80" class="form-control" required> <!-- เปลี่ยนค่าเริ่มต้นเป็น 80 -->
                             </td>
                             <td>
                                 <input type="number" step="0.01" name="electricity_bill[<?php echo $row['room_id']; ?>]" value="0" class="form-control" required>

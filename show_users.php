@@ -22,6 +22,28 @@ if (isset($_GET['delete_id'])) {
     }
 }
 
+// Handle adding new user
+if (isset($_POST['add_user'])) {
+    $firstName = $_POST['first_name'];
+    $lastName = $_POST['last_name'];
+    $gender = $_POST['gender'];
+    $email = $_POST['email'];
+    $number = $_POST['number'];
+    $password = password_hash($_POST['password'], PASSWORD_BCRYPT); // Hash the password for security
+
+    // Insert new user into the database
+    $insert_query = "INSERT INTO registration (firstName, lastName, gender, email, number, password) VALUES (?, ?, ?, ?, ?, ?)";
+    $stmt = $conn->prepare($insert_query);
+    $stmt->bind_param("ssssss", $firstName, $lastName, $gender, $email, $number, $password);
+
+    if ($stmt->execute()) {
+        header("Location: show_users.php?msg=User added successfully");
+        exit();
+    } else {
+        echo "Error adding user: " . $conn->error;
+    }
+}
+
 // Check if filter is applied
 $filter = "";
 if (isset($_POST['filter_email'])) {
@@ -54,10 +76,10 @@ if (!$result) {
             display: flex;
         }
         .sidebar {
-            height: 100%; /* Full height for sidebar */
+            height: 100%;
             background-color: #343a40;
             padding: 20px;
-            position: fixed; /* Fix to the left */
+            position: fixed;
         }
         .sidebar h2 {
             color: white;
@@ -74,7 +96,7 @@ if (!$result) {
             background-color: #495057;
         }
         .content {
-            margin-left: 240px; /* Leave space for the sidebar */
+            margin-left: 240px;
             padding: 20px;
             flex: 1;
         }
@@ -102,7 +124,6 @@ if (!$result) {
 
 <div class="sidebar">
     <h2>Admin Menu</h2>
-
     <a href="home.php">Back To Home Page</a>
     <a href="admin_dashboard.php">Dashboard</a>
     <a href="show_users.php">Manage Users</a>
@@ -113,18 +134,22 @@ if (!$result) {
     <a href="create_notification.php">Manage Notifications</a>
     <a href="logout.php" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
 </div>
-</div>
 
 <div class="content">
     <div class="container">
         <h1 class="text-center">Registered Users</h1>
 
-        <!-- Display success message if user deleted -->
+        <!-- Display success message if user deleted or added -->
         <?php if (isset($_GET['msg'])): ?>
             <div class="alert alert-success">
                 <?php echo htmlspecialchars($_GET['msg']); ?>
             </div>
         <?php endif; ?>
+
+        <!-- Button to open modal for adding new user -->
+        <button type="button" class="btn btn-primary mb-4" data-toggle="modal" data-target="#addUserModal">
+            Add New User
+        </button>
 
         <!-- Filter Form -->
         <form action="" method="POST" class="form-inline mb-4">
@@ -138,13 +163,13 @@ if (!$result) {
         <table class="table table-bordered table-striped">
             <thead>
                 <tr>
-                    <th>ID</th> <!-- ID Column -->
+                    <th>ID</th>
                     <th>First Name</th>
                     <th>Last Name</th>
                     <th>Gender</th>
                     <th>Email</th>
                     <th>Number</th>
-                    <th>Password</th> <!-- Password Column -->
+                    <th>Password</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -153,13 +178,13 @@ if (!$result) {
                 // Loop through to display each user
                 while ($row = mysqli_fetch_assoc($result)) {
                     echo "<tr>";
-                    echo "<td>" . htmlspecialchars($row['id']) . "</td>"; // Show ID
+                    echo "<td>" . htmlspecialchars($row['id']) . "</td>";
                     echo "<td>" . htmlspecialchars($row['firstName']) . "</td>";
                     echo "<td>" . htmlspecialchars($row['lastName']) . "</td>";
                     echo "<td>" . htmlspecialchars($row['gender']) . "</td>";
                     echo "<td>" . htmlspecialchars($row['email']) . "</td>";
                     echo "<td>" . htmlspecialchars($row['number']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['password']) . "</td>"; // Show Password
+                    echo "<td>" . htmlspecialchars($row['password']) . "</td>";
                     echo "<td>";
                     echo "<a href='edit_user.php?id=" . $row['id'] . "' class='btn btn-warning btn-sm'>Edit</a> ";
                     echo "<a href='show_users.php?delete_id=" . $row['id'] . "' class='btn btn-danger btn-sm' onclick='return confirm(\"Are you sure you want to delete this user?\");'>Delete</a>";
@@ -172,8 +197,54 @@ if (!$result) {
     </div>
 </div>
 
+<!-- Modal for Adding User -->
+<div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUserModalLabel">Add New User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="" method="POST">
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select class="form-control" id="gender" name="gender" required>
+                            <option value="m">Male</option>
+                            <option value="f">Female</option>
+                            <option value="o">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="number">Phone Number</label>
+                        <input type="text" class="form-control" id="number" name="number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" name="add_user" class="btn btn-success">Add User</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php
-// Close database connection
 mysqli_close($conn);
 ?>
 
