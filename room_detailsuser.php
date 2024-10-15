@@ -67,7 +67,7 @@ if (isset($_GET['id'])) {
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <a class="navbar-brand" href="#">The Brick Place</a>
+    <a class="navbar-brand" href="#">The Brick Place </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -129,8 +129,7 @@ if (isset($_GET['id'])) {
                 <p><strong>Details:</strong> <?php echo htmlspecialchars($room['details']); ?></p>
             </div>
             <div class="text-center">
-        <a href="view_rooms.php" class="btn btn-secondary btn-back mx-5">Back to Room List</a>
-        <a href="search_rooms.php" class="btn btn-secondary btn-back">Booking</a>
+        <a href="search_rooms.php" class="btn btn-secondary btn-back">Back to Room List</a>
     </div>
         </div>
     </div>

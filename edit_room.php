@@ -1,5 +1,5 @@
 <?php
-include 'connect.php';
+include 'connect.php'; // Connect to the database
 session_start(); 
 
 // Check if user is logged in
@@ -84,9 +84,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
+    // Handle floor plan image upload
+    if (isset($_FILES['floor_plan']) && $_FILES['floor_plan']['error'] == 0) {
+        $floorPlanDir = "uploads/";
+        $floorPlanFile = $floorPlanDir . basename($_FILES["floor_plan"]["name"]);
+        if (move_uploaded_file($_FILES["floor_plan"]["tmp_name"], $floorPlanFile)) {
+            $floorPlanUrl = $floorPlanFile;
+        } else {
+            $floorPlanUrl = $room['floor_plan_url']; // Keep existing if upload fails
+        }
+    } else {
+        $floorPlanUrl = $room['floor_plan_url']; // Keep existing if no new upload
+    }
+
     // Prepare SQL statement to update room details
-    $stmt = $conn->prepare("UPDATE rooms SET room_number = ?, room_type = ?, price = ?, furniture = ?, status = ?, image_url_1 = ?, image_url_2 = ?, image_url_3 = ?, image_url_4 = ?, details = ? WHERE id = ?");
-    $stmt->bind_param("ssdsssssssi", $roomNumber, $roomType, $price, $furniture, $status, $imageUrls[0], $imageUrls[1], $imageUrls[2], $imageUrls[3], $details, $roomId);
+    $stmt = $conn->prepare("UPDATE rooms SET room_number = ?, room_type = ?, price = ?, furniture = ?, status = ?, image_url_1 = ?, image_url_2 = ?, image_url_3 = ?, image_url_4 = ?, details = ?, floor_plan_url = ? WHERE id = ?");
+    $stmt->bind_param("ssdssssssssi", $roomNumber, $roomType, $price, $furniture, $status, $imageUrls[0], $imageUrls[1], $imageUrls[2], $imageUrls[3], $details, $floorPlanUrl, $roomId);
 
     if ($stmt->execute()) {
         echo "Room updated successfully!";
@@ -109,6 +122,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 <div class="container">
     <h1>Edit Room</h1>
+    <a href="show_rooms.php" class="btn btn-secondary mb-3">Back to Room List</a> <!-- Back button -->
     <form action="edit_room.php?id=<?php echo $roomId; ?>" method="post" enctype="multipart/form-data">
         <div class="form-group">
             <label>Room Number</label>
@@ -153,6 +167,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
         <div class="form-group">
+            <label>Floor Plan Image</label>
+            <input type="file" class="form-control" name="floor_plan">
+            <?php if (!empty($room['floor_plan_url'])): ?>
+                <div>
+                    <img src="<?php echo $room['floor_plan_url']; ?>" alt="Current Floor Plan" style="width:100px;height:auto; margin-top:5px;">
+                </div>
+            <?php endif; ?>
+        </div>
+        <div class="form-group">
             <label>Details</label>
             <textarea class="form-control" name="details" required><?php echo $room['details']; ?></textarea>
         </div>
@@ -161,3 +184,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 </body>
 </html>
+
+<?php
+$conn->close();
+?>

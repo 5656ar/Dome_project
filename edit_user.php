@@ -54,6 +54,7 @@ mysqli_close($conn);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <title>Edit User</title>
 </head>
 <style>
@@ -107,6 +108,21 @@ mysqli_close($conn);
             background-color: #0056b3; /* Darker blue on hover */
         }
 
+        .btn-back {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+
+        .btn-back:hover {
+            background-color: #5a6268; /* Darker gray on hover */
+        }
+
         .error-message {
             color: red;
             margin-bottom: 15px;
@@ -116,7 +132,9 @@ mysqli_close($conn);
 <body>
 
 <h1>Edit User</h1>
+<a href="show_rooms.php" class="btn btn-secondary mb-3">Back to Room List</a>
 
+<!-- ฟอร์มแก้ไขผู้ใช้ -->
 <form method="post" action="">
     <label for="firstName">First Name:</label>
     <input type="text" id="firstName" name="firstName" value="<?php echo htmlspecialchars($user['firstName']); ?>" required><br>
@@ -139,6 +157,8 @@ mysqli_close($conn);
 
     <input type="submit" value="Update User">
 </form>
+
+
 
 </body>
 </html>
