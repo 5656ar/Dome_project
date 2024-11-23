@@ -117,7 +117,7 @@ if ($bookedRoom) {
     <!-- Sidebar -->
     <div class="sidebar">
         <h2 class="text-white text-center">LOGO</h2>
-        <a href="home.php">Home</a> 
+        <a href="index.php">Home</a> 
         <a href="search_rooms.php">Search Rooms</a>
         <a href="#" data-toggle="modal" data-target="#editProfileModal">Edit Profile</a>
         <a href="#" data-toggle="modal" data-target="#utilityModal">View Utility Bills</a>
@@ -138,12 +138,12 @@ if ($bookedRoom) {
             <h5>Latest Utility Bill</h5>
             <?php if (isset($latestUtility) && $latestUtility): ?>
                 <p><strong>Month & Year:</strong> <?php echo htmlspecialchars($latestUtility['month_year']); ?></p>
-                <p><strong>Water Bill:</strong> ฿<?php echo htmlspecialchars($latestUtility['water_bill']); ?></p>
-                <p><strong>Electricity Bill:</strong> ฿<?php echo htmlspecialchars($latestUtility['electricity_bill']); ?></p>
-                <p><strong>Room Price:</strong> ฿<?php echo htmlspecialchars($bookedRoom['price']); ?></p>
+                <p><strong>Water Bill:</strong> ฿<?php echo number_format($latestUtility['water_bill'], 2); ?></p>
+                <p><strong>Electricity Bill:</strong> ฿<?php echo number_format($latestUtility['electricity_bill'], 2); ?></p>
+                <p><strong>Room Price:</strong> ฿<?php echo number_format($bookedRoom['price'], 2); ?></p>
                 <p><strong>Total Bill:</strong> ฿<?php 
                     $totalBill = ($latestUtility['water_bill'] ?? 0) + ($latestUtility['electricity_bill'] ?? 0) + $bookedRoom['price'];
-                    echo htmlspecialchars($totalBill); 
+                    echo number_format($totalBill, 2); 
                 ?></p>
                 <p><strong>Payment Status:</strong> 
                     <?php 
@@ -248,10 +248,10 @@ if ($bookedRoom) {
                                 while ($row = $result->fetch_assoc()) {
                                     echo "<tr>";
                                     echo "<td>" . htmlspecialchars($row['month_year']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($row['water_bill']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($row['electricity_bill']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($price) . "</td>";
-                                    echo "<td>" . htmlspecialchars($row['total_bill']) . "</td>";
+                                    echo "<td>฿" . number_format($row['water_bill'], 2) . "</td>";
+                                    echo "<td>฿" . number_format($row['electricity_bill'], 2) . "</td>";
+                                    echo "<td>฿" . number_format($price, 2) . "</td>";
+                                    echo "<td>฿" . number_format($row['total_bill'], 2) . "</td>";
                                     echo "</tr>";
                                 }
                             } else {

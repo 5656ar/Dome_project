@@ -138,16 +138,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['cancel_booking'])) {
 </head>
 <body>
     <div class="sidebar">
-        <h2 class="text-white">Admin Menu</h2>
-        <a href="home.php">Back To Home Page</a>
-        <a href="admin_dashboard.php">Dashboard</a>
-        <a href="show_users.php">Manage Users</a>
-        <a href="show_rooms.php">Manage Rooms</a>
-        <a href="confirm_bookings.php">Confirm bookings</a>
-        <a href="view_utilities.php">View Utilities</a>
-        <a href="set_utilities.php">Set Utilities</a>
-        <a href="create_notification.php">Manage Notifications</a>
-        <a href="logout.php" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
+    <h2>Admin Menu</h2>
+    <a href="index.php">Back To Home Page</a>
+    <a href="revenue_chart.php">Dashboard</a>
+    <a href="show_users.php">Manage Users</a>
+    <a href="show_rooms.php">Manage Rooms</a>
+    <a href="confirm_bookings.php">Confirm bookings</a>
+    <a href="view_utilities.php">View Utilities</a>
+    <a href="set_utilities.php">Set Utilities</a>
+    <a href="create_notification.php">Manage Notifications</a>
+    <a href="view_notifications.php">View Notifications</a>
+    <a href="admin_dashboard.php">Confirm Payment</a>
+    <a href="logout.php" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
     </div>
 
     <div class="content">

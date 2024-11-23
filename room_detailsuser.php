@@ -73,7 +73,7 @@ if (isset($_GET['id'])) {
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto">
-            <li class="nav-item"><a class="nav-link" href="home.php">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="index.php">Home</a></li>
             <li class="nav-item"><a class="nav-link" href="search_rooms.php">Search Rooms</a></li>
             <li class="nav-item"><a class="nav-link" href="index2.php">Dashboard</a></li>
             <?php if (isset($_SESSION['userId'])): ?>
@@ -124,7 +124,16 @@ if (isset($_GET['id'])) {
             <div class="room-info">
                 <p><strong>Type:</strong> <?php echo htmlspecialchars($room['room_type']); ?></p>
                 <p><strong>Price:</strong> ฿<?php echo htmlspecialchars(number_format($room['price'], 2)); ?></p>
-                <p><strong>Status:</strong> <?php echo htmlspecialchars($room['status']); ?></p>
+                <p class="card-text">
+                            Status: 
+                            <span class="<?php 
+                                echo $room['status'] == 'available' ? 'text-success' : 
+                                    ($room['status'] == 'rented' ? 'text-danger' : 
+                                    ($room['status'] == 'pending' ? 'text-warning' : 'text-muted')); 
+                            ?>">
+                                <?php echo htmlspecialchars($room['status']); ?>
+                            </span>
+                        </p>
                 <p><strong>Furniture:</strong> <?php echo htmlspecialchars($room['furniture']); ?></p>
                 <p><strong>Details:</strong> <?php echo htmlspecialchars($room['details']); ?></p>
             </div>

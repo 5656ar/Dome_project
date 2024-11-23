@@ -15,31 +15,46 @@ $roomsResult = $conn->query($roomsSql);
 // Initialize variables for filtering
 $selectedRoomId = isset($_POST['room_id']) ? $_POST['room_id'] : '';
 $selectedUserId = isset($_POST['user_id']) ? $_POST['user_id'] : '';
+$selectedMonthYear = isset($_POST['month_year']) ? $_POST['month_year'] : '';
 
-// Fetch utility bills along with room details for the selected room or user
+// Start building SQL query for utility bills
 $sql = "SELECT r.room_number, u.id AS utility_id, u.month_year, u.water_bill, u.electricity_bill, r.price, u.user_id, u.payment_status
         FROM utility_bills u
-        JOIN rooms r ON u.room_id = r.id
-        WHERE 1=1";  // Default WHERE clause to avoid syntax issues
+        JOIN rooms r ON u.room_id = r.id";
+
+// Only add conditions if filters are applied
+$conditions = [];
+$bindParams = [];
+$bindTypes = '';
 
 if ($selectedRoomId) {
-    $sql .= " AND r.id = ?";
+    $conditions[] = "r.id = ?";
+    $bindParams[] = $selectedRoomId;
+    $bindTypes .= 'i';
 }
 if ($selectedUserId) {
-    $sql .= " AND u.user_id = ?";
+    $conditions[] = "u.user_id = ?";
+    $bindParams[] = $selectedUserId;
+    $bindTypes .= 'i';
 }
+if ($selectedMonthYear) {
+    $conditions[] = "u.month_year = ?";
+    $bindParams[] = $selectedMonthYear;
+    $bindTypes .= 's';
+}
+
+// Append conditions to SQL query if any are present
+if (!empty($conditions)) {
+    $sql .= " WHERE " . implode(" AND ", $conditions);
+}
+
 $sql .= " ORDER BY u.month_year DESC";
 
-// Prepare statement
+// Prepare and execute statement
 $stmt = $conn->prepare($sql);
 
-// Bind parameters
-if ($selectedRoomId && $selectedUserId) {
-    $stmt->bind_param("ii", $selectedRoomId, $selectedUserId);
-} elseif ($selectedRoomId) {
-    $stmt->bind_param("i", $selectedRoomId);
-} elseif ($selectedUserId) {
-    $stmt->bind_param("i", $selectedUserId);
+if ($bindParams) {
+    $stmt->bind_param($bindTypes, ...$bindParams);
 }
 
 $stmt->execute();
@@ -55,17 +70,16 @@ $result = $stmt->get_result();
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #f4f4f4;
             font-family: Arial, sans-serif;
             margin: 0;
-            display: flex; /* Use flex layout */
+            display: flex;
         }
         .sidebar {
-            height: 100vh; /* Full height for sidebar */
-            width: 220px; /* Fixed width for sidebar */
-            background-color: #343a40; /* Dark background */
+            height: 100%;
+            background-color: #343a40;
             padding: 20px;
-            position: fixed; /* Fix position to the left */
+            position: fixed;
         }
         .sidebar h2 {
             color: white;
@@ -82,21 +96,27 @@ $result = $stmt->get_result();
             background-color: #495057;
         }
         .content {
-            margin-left: 240px; /* Leave space for sidebar */
+            margin-left: 240px;
             padding: 20px;
             flex: 1;
         }
         .container {
             background-color: white;
-            padding: 30px;
+            padding: 20px;
             border-radius: 5px;
-            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            color: #343a40;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
         }
         .alert {
             margin-top: 20px;
+        }
+        table {
+            margin-top: 20px;
+        }
+        th, td {
+            vertical-align: middle;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
         }
     </style>
 </head>
@@ -104,14 +124,16 @@ $result = $stmt->get_result();
 
 <div class="sidebar">
     <h2>Admin Menu</h2>
-    <a href="home.php">Back To Home Page</a>
-    <a href="admin_dashboard.php">Dashboard</a>
+    <a href="index.php">Back To Home Page</a>
+    <a href="revenue_chart.php">Dashboard</a>
     <a href="show_users.php">Manage Users</a>
     <a href="show_rooms.php">Manage Rooms</a>
     <a href="confirm_bookings.php">Confirm bookings</a>
     <a href="view_utilities.php">View Utilities</a>
     <a href="set_utilities.php">Set Utilities</a>
     <a href="create_notification.php">Manage Notifications</a>
+    <a href="view_notifications.php">View Notifications</a>
+    <a href="admin_dashboard.php">Confirm Payment</a>
     <a href="logout.php" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
 </div>
 
@@ -134,52 +156,57 @@ $result = $stmt->get_result();
             
             <div class="form-group">
                 <label for="user_id">Filter by User ID:</label>
-                <input type="text" name="user_id" id="user_id" class="form-control" value="<?php echo isset($_POST['user_id']) ? htmlspecialchars($_POST['user_id']) : ''; ?>">
+                <input type="text" name="user_id" id="user_id" class="form-control" value="<?php echo htmlspecialchars($selectedUserId); ?>">
+            </div>
+
+            <div class="form-group">
+                <label for="month_year">Filter by Month & Year:</label>
+                <input type="month" name="month_year" id="month_year" class="form-control" value="<?php echo htmlspecialchars($selectedMonthYear); ?>">
             </div>
 
             <button type="submit" class="btn btn-primary">Show Utility Bills</button>
         </form>
 
         <table class="table table-bordered mt-3">
-    <thead>
-        <tr>
-            <th>Room Number</th>
-            <th>Month & Year</th>
-            <th>Water Bill (฿)</th>
-            <th>Electricity Bill (฿)</th>
-            <th>Room Price (฿)</th>
-            <th>Total Bill (฿)</th>
-            <th>User ID</th>
-            <th>Payment Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-    <?php
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $totalBill = $row['water_bill'] + $row['electricity_bill'] + $row['price'];
-            echo "<tr>";
-            echo "<td>" . htmlspecialchars($row['room_number']) . "</td>";
-            echo "<td>" . htmlspecialchars($row['month_year']) . "</td>";
-            echo "<td>" . htmlspecialchars($row['water_bill']) . "</td>";
-            echo "<td>" . htmlspecialchars($row['electricity_bill']) . "</td>";
-            echo "<td>" . htmlspecialchars($row['price']) . "</td>";
-            echo "<td>" . htmlspecialchars($totalBill) . "</td>";
-            echo "<td>" . htmlspecialchars($row['user_id']) . "</td>"; // Display User ID
-            echo "<td>" . htmlspecialchars($row['payment_status']) . "</td>"; // Display payment status
-            echo "<td>
-                    <button class='btn btn-warning' data-toggle='modal' data-target='#editModal' data-id='" . htmlspecialchars($row['utility_id']) . "' data-water='" . htmlspecialchars($row['water_bill']) . "' data-electricity='" . htmlspecialchars($row['electricity_bill']) . "'>Edit</button>
-                  </td>";
-            echo "</tr>";
-        }
-    } else {
-        echo "<tr><td colspan='9'>No utility bills found</td></tr>";
-    }
-    ?>
-    </tbody>
-</table>
-
+            <thead>
+                <tr>
+                    <th>Room Number</th>
+                    <th>Month & Year</th>
+                    <th>Water Bill (฿)</th>
+                    <th>Electricity Bill (฿)</th>
+                    <th>Room Price (฿)</th>
+                    <th>Total Bill (฿)</th>
+                    <th>User ID</th>
+                    <th>Payment Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    // Format Total Bill with two decimal places
+                    $totalBill = number_format($row['water_bill'] + $row['electricity_bill'] + $row['price'], 2);
+                    echo "<tr>";
+                    echo "<td>" . htmlspecialchars($row['room_number']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['month_year']) . "</td>";
+                    echo "<td>" . htmlspecialchars(number_format($row['water_bill'], 2)) . "</td>";
+                    echo "<td>" . htmlspecialchars(number_format($row['electricity_bill'], 2)) . "</td>";
+                    echo "<td>" . htmlspecialchars(number_format($row['price'], 2)) . "</td>";
+                    echo "<td>" . htmlspecialchars($totalBill) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['user_id']) . "</td>";
+                    echo "<td>" . htmlspecialchars($row['payment_status']) . "</td>";
+                    echo "<td>
+                            <button class='btn btn-warning' data-toggle='modal' data-target='#editModal' data-id='" . htmlspecialchars($row['utility_id']) . "' data-water='" . htmlspecialchars($row['water_bill']) . "' data-electricity='" . htmlspecialchars($row['electricity_bill']) . "'>Edit</button>
+                          </td>";
+                    echo "</tr>";
+                }
+            } else {
+                echo "<tr><td colspan='9'>No utility bills found</td></tr>";
+            }
+            ?>
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -198,11 +225,11 @@ $result = $stmt->get_result();
                     <input type="hidden" name="utility_id" id="utility_id">
                     <div class="form-group">
                         <label for="water_bill">Water Bill (฿)</label>
-                        <input type="number" class="form-control" id="water_bill" name="water_bill" required>
+                        <input type="number" step="0.01" class="form-control" id="water_bill" name="water_bill" required>
                     </div>
                     <div class="form-group">
                         <label for="electricity_bill">Electricity Bill (฿)</label>
-                        <input type="number" class="form-control" id="electricity_bill" name="electricity_bill" required>
+                        <input type="number" step="0.01" class="form-control" id="electricity_bill" name="electricity_bill" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </form>
@@ -216,8 +243,8 @@ $result = $stmt->get_result();
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
     $('#editModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget); // Button that triggered the modal
-        var utilityId = button.data('id'); // Extract info from data-* attributes
+        var button = $(event.relatedTarget); 
+        var utilityId = button.data('id');
         var waterBill = button.data('water');
         var electricityBill = button.data('electricity');
 

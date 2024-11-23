@@ -24,7 +24,7 @@ if ($result->num_rows > 0) {
         $_SESSION['email'] = $row['email'];
         
         // Redirect to index2.php
-        header("Location: home.php");
+        header("Location: index.php");
         exit(); // Prevent further script execution after redirection
     } else {
         // Set an error session variable if password doesn't match

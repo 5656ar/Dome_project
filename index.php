@@ -3,7 +3,7 @@ include 'connect.php';
 session_start();
 
 // Fetch the latest notification
-$sql = "SELECT * FROM notifications ORDER BY created_at DESC LIMIT 1";
+$sql = "SELECT * FROM notifications WHERE is_visible = 1 ORDER BY created_at DESC LIMIT 1";
 $result = $conn->query($sql);
 $latestNotification = $result->fetch_assoc();
 ?>
@@ -104,7 +104,7 @@ $latestNotification = $result->fetch_assoc();
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="home.php">Home</a>
+                    <a class="nav-link" href="index.php">Home</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="search_rooms.php">Search Rooms</a>
@@ -129,8 +129,8 @@ $latestNotification = $result->fetch_assoc();
     <section class="hero">
         <div class="container">
             <h1>Welcome to The Brick Place</h1>
-            <p>Your journey starts here. Explore the best rooms and services available for your next adventure.</p>
-            <a href="view_rooms.php" class="btn btn-light btn-lg">Search Rooms</a>
+            <p>การเดินทางของคุณเริ่มต้นที่นี่ สำรวจห้องพักและบริการที่ดีที่สุดสำหรับการผจญภัยครั้งต่อไปของคุณ</p>
+            <a href="search_rooms.php" class="btn btn-light btn-lg">Search Rooms</a>
         </div>
     </section>
     <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
@@ -195,7 +195,7 @@ $latestNotification = $result->fetch_assoc();
                     <div class="card p-4">
                         <div class="card-body text-center">
                             <h4 class="card-title">Room Search</h4>
-                            <p class="card-text">Find the perfect room for your stay with our easy-to-use search system.</p>
+                            <p class="card-text">ค้นหาห้องพักที่สมบูรณ์แบบสำหรับการเข้าพักของคุณด้วยระบบค้นหาที่ใช้งานง่ายของเรา</p>
                             <a href="view_rooms.php" class="btn btn-primary">Explore Rooms</a>
                         </div>
                     </div>
@@ -204,7 +204,7 @@ $latestNotification = $result->fetch_assoc();
                     <div class="card p-4">
                         <div class="card-body text-center">
                             <h4 class="card-title">Easy Registration</h4>
-                            <p class="card-text">Sign up today to get access to exclusive offers and personalized services.</p>
+                            <p class="card-text">ลงทะเบียนวันนี้เพื่อรับสิทธิ์เข้าถึงข้อเสนอสุดพิเศษและบริการส่วนบุคคล</p>
                             <a class="btn btn-primary" href="#" data-toggle="modal" data-target="#registerModal">Register</a>
                         </div>
                     </div>
@@ -213,7 +213,7 @@ $latestNotification = $result->fetch_assoc();
                     <div class="card p-4">
                         <div class="card-body text-center">
                             <h4 class="card-title">User Support</h4>
-                            <p class="card-text">Need help? Our team is here to assist you 24/7 for any inquiries.</p>
+                            <p class="card-text">ต้องการความช่วยเหลือ? ทีมงานของเราพร้อมให้ความช่วยเหลือคุณตลอด 24 ชั่วโมงทุกวันหากมีข้อสงสัย</p>
                             <a href="https://www.facebook.com/Thebrickplace1" class="btn btn-primary">Contact Support</a>
                         </div>
                     </div>
@@ -226,7 +226,7 @@ $latestNotification = $result->fetch_assoc();
     <?php if ($latestNotification): ?>
         <div class="notification-banner">
             <p>🔔 Latest Notification</p>
-            <p><?php echo $latestNotification['content']; ?></p>
+            <p><?php echo htmlspecialchars($latestNotification['content']); ?></p>
         </div>
     <?php endif; ?>
 

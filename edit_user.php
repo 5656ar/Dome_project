@@ -132,7 +132,7 @@ mysqli_close($conn);
 <body>
 
 <h1>Edit User</h1>
-<a href="show_rooms.php" class="btn btn-secondary mb-3">Back to Room List</a>
+<a href="show_users.php" class="btn btn-secondary mb-3">Back to User List</a>
 
 <!-- ฟอร์มแก้ไขผู้ใช้ -->
 <form method="post" action="">

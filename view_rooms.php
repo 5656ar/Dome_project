@@ -100,7 +100,7 @@ $result = $stmt->get_result();
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-                <a class="nav-link" href="home.php">Home</a>
+                <a class="nav-link" href="index.php">Home</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="search_rooms.php">Search Rooms</a>
@@ -169,7 +169,16 @@ $result = $stmt->get_result();
                         <h5 class="card-title">Room <?php echo htmlspecialchars($room['room_number']); ?></h5>
                         <p class="card-text">Type: <?php echo htmlspecialchars($room['room_type']); ?></p>
                         <p class="card-text">Price: ฿<?php echo number_format($room['price'], 2); ?></p>
-                        <p class="card-text">Status: <?php echo ucfirst($room['status']); ?></p>
+                        <p class="card-text">
+                            Status: 
+                            <span class="<?php 
+                                echo $room['status'] == 'available' ? 'text-success' : 
+                                    ($room['status'] == 'rented' ? 'text-danger' : 
+                                    ($room['status'] == 'pending' ? 'text-warning' : 'text-muted')); 
+                            ?>">
+                                <?php echo htmlspecialchars($room['status']); ?>
+                            </span>
+                        </p>
                         <a href="room_details.php?id=<?php echo htmlspecialchars($room['id']); ?>" class="btn btn-info">View Details</a>
                     </div>
                 </div>

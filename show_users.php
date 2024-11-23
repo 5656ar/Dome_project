@@ -44,14 +44,23 @@ if (isset($_POST['add_user'])) {
     }
 }
 
-// Check if filter is applied
-$filter = "";
-if (isset($_POST['filter_email'])) {
-    $filter = $_POST['filter_email'];
-    $query = "SELECT * FROM registration WHERE email LIKE '%$filter%'";
-} else {
-    // Fetch all users if no filter
-    $query = "SELECT * FROM registration";
+// Set default query to fetch all users
+$query = "SELECT * FROM registration";
+$conditions = [];
+
+// Check if filter by email or ID is applied
+if (!empty($_POST['filter_email'])) {
+    $filter_email = $_POST['filter_email'];
+    $conditions[] = "email LIKE '%$filter_email%'";
+}
+if (!empty($_POST['filter_id'])) {
+    $filter_id = (int)$_POST['filter_id'];
+    $conditions[] = "id = $filter_id";
+}
+
+// Combine conditions if any filters are applied
+if (count($conditions) > 0) {
+    $query .= " WHERE " . implode(" AND ", $conditions);
 }
 
 $result = mysqli_query($conn, $query);
@@ -109,9 +118,6 @@ if (!$result) {
         .alert {
             margin-top: 20px;
         }
-        table {
-            margin-top: 20px;
-        }
         th, td {
             vertical-align: middle;
         }
@@ -124,14 +130,16 @@ if (!$result) {
 
 <div class="sidebar">
     <h2>Admin Menu</h2>
-    <a href="home.php">Back To Home Page</a>
-    <a href="admin_dashboard.php">Dashboard</a>
+    <a href="index.php">Back To Home Page</a>
+    <a href="revenue_chart.php">Dashboard</a>
     <a href="show_users.php">Manage Users</a>
     <a href="show_rooms.php">Manage Rooms</a>
     <a href="confirm_bookings.php">Confirm bookings</a>
     <a href="view_utilities.php">View Utilities</a>
     <a href="set_utilities.php">Set Utilities</a>
     <a href="create_notification.php">Manage Notifications</a>
+    <a href="view_notifications.php">View Notifications</a>
+    <a href="admin_dashboard.php">Confirm Payment</a>
     <a href="logout.php" onclick="return confirm('Are you sure you want to log out?');">Logout</a>
 </div>
 
@@ -155,45 +163,52 @@ if (!$result) {
         <form action="" method="POST" class="form-inline mb-4">
             <div class="form-group mx-sm-3 mb-2">
                 <label for="filter_email" class="sr-only">Email Domain</label>
-                <input type="text" name="filter_email" class="form-control" id="filter_email" placeholder="Enter email domain (e.g., gmail.com)" value="<?php echo htmlspecialchars($filter); ?>">
+                <input type="text" name="filter_email" class="form-control" id="filter_email" placeholder="Enter email domain (e.g., gmail.com)" value="<?php echo isset($filter_email) ? htmlspecialchars($filter_email) : ''; ?>">
+            </div>
+            <div class="form-group mx-sm-3 mb-2">
+                <label for="filter_id" class="sr-only">User ID</label>
+                <input type="text" name="filter_id" class="form-control" id="filter_id" placeholder="Enter User ID" value="<?php echo isset($filter_id) ? htmlspecialchars($filter_id) : ''; ?>">
             </div>
             <button type="submit" class="btn btn-primary mb-2">Filter</button>
         </form>
 
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Gender</th>
-                    <th>Email</th>
-                    <th>Number</th>
-                    <th>Password</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                // Loop through to display each user
-                while ($row = mysqli_fetch_assoc($result)) {
-                    echo "<tr>";
-                    echo "<td>" . htmlspecialchars($row['id']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['firstName']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['lastName']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['gender']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['number']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['password']) . "</td>";
-                    echo "<td>";
-                    echo "<a href='edit_user.php?id=" . $row['id'] . "' class='btn btn-warning btn-sm'>Edit</a> ";
-                    echo "<a href='show_users.php?delete_id=" . $row['id'] . "' class='btn btn-danger btn-sm' onclick='return confirm(\"Are you sure you want to delete this user?\");'>Delete</a>";
-                    echo "</td>";
-                    echo "</tr>";
-                }
-                ?>
-            </tbody>
-        </table>
+        <!-- Table container for responsive display -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Gender</th>
+                        <th>Email</th>
+                        <th>Number</th>
+                        <th>Password</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    // Loop through to display each user
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        echo "<tr>";
+                        echo "<td>" . htmlspecialchars($row['id']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['firstName']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['lastName']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['gender']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['email']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['number']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['password']) . "</td>";
+                        echo "<td>";
+                        echo "<a href='edit_user.php?id=" . $row['id'] . "' class='btn btn-warning btn-sm'>Edit</a> ";
+                        echo "<a href='show_users.php?delete_id=" . $row['id'] . "' class='btn btn-danger btn-sm' onclick='return confirm(\"Are you sure you want to delete this user?\");'>Delete</a>";
+                        echo "</td>";
+                        echo "</tr>";
+                    }
+                    ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
